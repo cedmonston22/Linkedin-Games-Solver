@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LinkedIn Games Solver</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div id="app">
+      <h1>LinkedIn Games Solver</h1>
+      <p id="status">Navigate to a LinkedIn game to get started.</p>
+
+      <div id="controls" class="hidden">
+        <div id="game-name"></div>
+        <div class="mode-toggle">
+          <label>
+            <input type="radio" name="mode" value="instant" checked />
+            Instant
+          </label>
+          <label>
+            <input type="radio" name="mode" value="animated" />
+            Animated
+          </label>
+        </div>
+        <button id="solve-btn">Solve</button>
+      </div>
+    </div>
+    <script type="module" src="popup.ts"></script>
+  </body>
+</html>

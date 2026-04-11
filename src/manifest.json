@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "LinkedIn Games Solver",
+  "version": "0.1.0",
+  "description": "Solver for LinkedIn games: Queens, Zip, Tango, and Patches",
+  "permissions": ["activeTab", "debugger"],
+  "background": {
+    "service_worker": "src/background/index.ts"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.linkedin.com/*"],
+      "js": ["src/content/index.ts"]
+    },
+    {
+      "matches": ["https://www.archivedqueens.com/*"],
+      "js": ["src/content/archived-index.ts"]
+    }
+  ],
+  "action": {
+    "default_popup": "src/popup/index.html"
+  }
+}
