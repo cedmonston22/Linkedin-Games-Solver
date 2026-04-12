@@ -1,6 +1,6 @@
 console.log("[LinkedIn Solver] Content script loaded");
 
-// ---- Parser ----
+// ==== Queens Parser ====
 
 var CELL_LABEL_REGEX = /^(.+?) (?:cell )?of color (.+), row (\d+), column (\d+)$/;
 
@@ -55,7 +55,7 @@ function parseQueensBoard() {
   return { size: size, regions: regions };
 }
 
-// ---- Solver ----
+// ==== Queens Solver ====
 
 function solveQueens(board) {
   var size = board.size;
@@ -100,7 +100,7 @@ function solveQueens(board) {
   return { queens: solved ? queens.slice() : [], solved: solved };
 }
 
-// ---- Injector ----
+// ==== Queens Injector ====
 
 function sendClick(x, y) {
   return new Promise(function(resolve) {
@@ -121,7 +121,191 @@ function getCellCenter(row, col, size) {
   };
 }
 
-async function runSolver() {
+// ==== Zip Parser ====
+
+function encodeWall(row, col, direction) {
+  return row + "," + col + "," + direction;
+}
+
+function parseZipBoard() {
+  var grid = document.querySelector('[data-testid="interactive-grid"]');
+  if (!grid) {
+    console.error("[LinkedIn Solver] No interactive grid found");
+    return null;
+  }
+
+  var style = grid.getAttribute("style") || "";
+  var sizeMatch = style.match(/--_6afcf54e:\s*(\d+)/);
+  if (!sizeMatch) {
+    console.error("[LinkedIn Solver] Could not determine grid size");
+    return null;
+  }
+  var size = parseInt(sizeMatch[1], 10);
+
+  var cells = grid.querySelectorAll('[data-testid^="cell-"]');
+  if (cells.length !== size * size) {
+    console.error("[LinkedIn Solver] Expected " + (size * size) + " cells, found " + cells.length);
+    return null;
+  }
+
+  var checkpoints = {};
+  var walls = {};
+
+  for (var i = 0; i < cells.length; i++) {
+    var cell = cells[i];
+    var idxAttr = cell.getAttribute("data-cell-idx");
+    if (idxAttr === null) continue;
+    var idx = parseInt(idxAttr, 10);
+    var row = Math.floor(idx / size);
+    var col = idx % size;
+
+    // Check for numbered checkpoint
+    var ariaLabel = cell.getAttribute("aria-label");
+    if (ariaLabel) {
+      var numMatch = ariaLabel.match(/Number\s+(\d+)/);
+      if (numMatch) {
+        checkpoints[parseInt(numMatch[1], 10)] = { row: row, col: col };
+      }
+    }
+
+    // Check for walls
+    var divs = cell.querySelectorAll("div");
+    for (var d = 0; d < divs.length; d++) {
+      var cls = divs[d].className;
+      if (cls.indexOf("trail-cell-wall--right") !== -1 || cls.indexOf("_63fae645") !== -1) {
+        walls[encodeWall(row, col, "right")] = true;
+      }
+      if (cls.indexOf("trail-cell-wall--left") !== -1 || cls.indexOf("_6177935e") !== -1) {
+        walls[encodeWall(row, col, "left")] = true;
+      }
+      if (cls.indexOf("trail-cell-wall--top") !== -1) {
+        walls[encodeWall(row, col, "top")] = true;
+      }
+      if (cls.indexOf("trail-cell-wall--bottom") !== -1) {
+        walls[encodeWall(row, col, "bottom")] = true;
+      }
+    }
+  }
+
+  console.log("[LinkedIn Solver] Parsed " + size + "x" + size + " Zip board");
+  return { size: size, checkpoints: checkpoints, walls: walls };
+}
+
+// ==== Zip Solver ====
+
+function solveZip(board) {
+  var size = board.size;
+  var checkpoints = board.checkpoints;
+  var walls = board.walls;
+  var totalCells = size * size;
+
+  // Build checkpoint lookup
+  var checkpointAt = {};
+  var maxCheckpoint = 0;
+  for (var num in checkpoints) {
+    var n = parseInt(num, 10);
+    var pos = checkpoints[num];
+    checkpointAt[pos.row + "," + pos.col] = n;
+    if (n > maxCheckpoint) maxCheckpoint = n;
+  }
+
+  var visited = [];
+  for (var r = 0; r < size; r++) {
+    visited[r] = [];
+    for (var c = 0; c < size; c++) {
+      visited[r][c] = false;
+    }
+  }
+
+  var path = [];
+  var DIRS = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+
+  function isBlocked(r1, c1, r2, c2) {
+    if (r2 === r1 && c2 === c1 + 1) {
+      return walls[encodeWall(r1, c1, "right")] || walls[encodeWall(r2, c2, "left")];
+    }
+    if (r2 === r1 && c2 === c1 - 1) {
+      return walls[encodeWall(r1, c1, "left")] || walls[encodeWall(r2, c2, "right")];
+    }
+    if (r2 === r1 + 1 && c2 === c1) {
+      return walls[encodeWall(r1, c1, "bottom")] || walls[encodeWall(r2, c2, "top")];
+    }
+    if (r2 === r1 - 1 && c2 === c1) {
+      return walls[encodeWall(r1, c1, "top")] || walls[encodeWall(r2, c2, "bottom")];
+    }
+    return true;
+  }
+
+  function solve(row, col, nextCheckpoint) {
+    if (row < 0 || row >= size || col < 0 || col >= size) return false;
+    if (visited[row][col]) return false;
+
+    var cpNum = checkpointAt[row + "," + col];
+    if (cpNum !== undefined) {
+      if (cpNum !== nextCheckpoint) return false;
+    }
+
+    visited[row][col] = true;
+    path.push({ row: row, col: col });
+
+    var newNext = (cpNum === nextCheckpoint) ? nextCheckpoint + 1 : nextCheckpoint;
+
+    if (path.length === totalCells) {
+      if (newNext > maxCheckpoint) return true;
+      visited[row][col] = false;
+      path.pop();
+      return false;
+    }
+
+    for (var d = 0; d < DIRS.length; d++) {
+      var nr = row + DIRS[d][0];
+      var nc = col + DIRS[d][1];
+      if (nr < 0 || nr >= size || nc < 0 || nc >= size) continue;
+      if (visited[nr][nc]) continue;
+      if (isBlocked(row, col, nr, nc)) continue;
+      if (solve(nr, nc, newNext)) return true;
+    }
+
+    visited[row][col] = false;
+    path.pop();
+    return false;
+  }
+
+  var start = checkpoints[1];
+  if (!start) return { path: [], solved: false };
+
+  var solved = solve(start.row, start.col, 1);
+  return { path: solved ? path.slice() : [], solved: solved };
+}
+
+// ==== Zip Injector ====
+
+function sendMouseEvent(eventType, x, y) {
+  return new Promise(function(resolve) {
+    chrome.runtime.sendMessage(
+      { type: "MOUSE_EVENT", eventType: eventType, x: x, y: y },
+      function(response) { resolve(response); }
+    );
+  });
+}
+
+function getCellCenterByIdx(idx) {
+  var cell = document.querySelector('[data-testid="cell-' + idx + '"]');
+  if (!cell) return null;
+  var rect = cell.getBoundingClientRect();
+  return {
+    x: Math.round(rect.left + rect.width / 2),
+    y: Math.round(rect.top + rect.height / 2)
+  };
+}
+
+function delay(ms) {
+  return new Promise(function(resolve) { setTimeout(resolve, ms); });
+}
+
+// ==== Solver Dispatcher ====
+
+async function runQueensSolver() {
   var board = parseQueensBoard();
   if (!board) return { success: false, error: "Failed to parse board" };
 
@@ -130,10 +314,8 @@ async function runSolver() {
 
   for (var i = 0; i < solution.queens.length; i++) {
     var q = solution.queens[i];
-
     var center1 = getCellCenter(q.row, q.col, board.size);
     if (center1) await sendClick(center1.x, center1.y);
-
     var center2 = getCellCenter(q.row, q.col, board.size);
     if (center2) await sendClick(center2.x, center2.y);
   }
@@ -141,12 +323,56 @@ async function runSolver() {
   return { success: true };
 }
 
+async function runZipSolver() {
+  var board = parseZipBoard();
+  if (!board) return { success: false, error: "Failed to parse board" };
+
+  var solution = solveZip(board);
+  if (!solution.solved) return { success: false, error: "No solution found" };
+
+  // Simulate drag: mousedown, mousemove through path, mouseup
+  var first = solution.path[0];
+  var firstIdx = first.row * board.size + first.col;
+  var startCenter = getCellCenterByIdx(firstIdx);
+  if (!startCenter) return { success: false, error: "Could not find start cell" };
+
+  await sendMouseEvent("mousePressed", startCenter.x, startCenter.y);
+  await delay(50);
+
+  for (var i = 1; i < solution.path.length; i++) {
+    var pos = solution.path[i];
+    var idx = pos.row * board.size + pos.col;
+    var center = getCellCenterByIdx(idx);
+    if (center) {
+      await sendMouseEvent("mouseMoved", center.x, center.y);
+      await delay(30);
+    }
+  }
+
+  var last = solution.path[solution.path.length - 1];
+  var lastIdx = last.row * board.size + last.col;
+  var endCenter = getCellCenterByIdx(lastIdx);
+  if (endCenter) {
+    await sendMouseEvent("mouseReleased", endCenter.x, endCenter.y);
+  }
+
+  return { success: true };
+}
+
+async function runSolver(game) {
+  switch (game) {
+    case "queens": return runQueensSolver();
+    case "zip": return runZipSolver();
+    default: return { success: false, error: "Unknown game: " + game };
+  }
+}
+
 // Listen for messages from popup
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
   if (message.type === "SOLVE") {
-    runSolver().then(function(result) {
+    runSolver(message.game).then(function(result) {
       sendResponse(result);
     });
-    return true; // keep sendResponse alive for async
+    return true;
   }
 });

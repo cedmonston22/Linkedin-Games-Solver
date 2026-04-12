@@ -32,17 +32,6 @@ h1 {
   color: #58a6ff;
 }
 
-.mode-toggle {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 12px;
-  font-size: 12px;
-}
-
-.mode-toggle label {
-  cursor: pointer;
-}
-
 #solve-btn {
   width: 100%;
   padding: 8px;

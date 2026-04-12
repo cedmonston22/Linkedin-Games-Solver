@@ -66,7 +66,8 @@ Solvers take a typed board state and return a solution. Zero browser/DOM depende
 
 - **Queens (LinkedIn)**: Fully working. Parser reads `aria-label` attributes. Debugger API clicks.
 - **Queens (archivedqueens.com)**: Fully working. Parser reads CSS grid + `background-color`. Mousedown events.
-- **Zip, Tango, Patches**: Not yet started.
+- **Zip (LinkedIn)**: Fully working. Parser reads `aria-label="Number X"` and `trail-cell-wall--{direction}` classes. Debugger API drag (mousePressed → mouseMoved → mouseReleased).
+- **Tango, Patches**: Not yet started.
 
 ## DOM Parsing
 
@@ -80,3 +81,12 @@ Solvers take a typed board state and return a solution. Zero browser/DOM depende
 - Board: `div.board` with `grid-template-columns: repeat(N, 1fr)`
 - Cells: plain child `<div>` elements with inline `background-color` for regions
 - Content: empty = no text, X marker = `x` text, queen = `🜲` text
+
+### LinkedIn Zip
+- Container: `[data-testid="zip-game-container"]`
+- Board: `[data-testid="interactive-grid"]` with CSS var `--_6afcf54e` for grid size
+- Cells: `[data-testid^="cell-"]` with `data-cell-idx` attribute
+- Checkpoints: cells with `aria-label="Number X"` (e.g. `"Number 1"`, `"Number 5"`)
+- Walls: child `<div>` elements with class `trail-cell-wall--{right|left|top|bottom}` (unobfuscated) or `_63fae645` (right) / `_6177935e` (left) (obfuscated)
+- Walls come in pairs: if cell (r,c) has `wall--right`, then cell (r,c+1) has `wall--left`
+- Input: dragging (mousePressed → mouseMoved through path → mouseReleased)

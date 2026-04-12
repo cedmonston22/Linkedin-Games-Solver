@@ -1,0 +1,261 @@
+- iframe [active] [ref=e2]:
+  - generic [ref=f24e15]:
+    - generic:
+      - region "Toast message":
+        - heading "0 notifications total" [level=2] [ref=f24e2]
+        - alert
+    - generic [ref=f24e20]:
+      - generic [ref=f24e23]:
+        - generic [ref=f24e24]:
+          - button "Back" [ref=f24e25] [cursor=pointer]:
+            - img [ref=f24e26]
+          - img [ref=f24e29]
+          - generic [ref=f24e31]: Tango
+        - generic [ref=f24e74]:
+          - text: Difficulty
+          - generic [ref=f24e75]: HARD
+        - generic [ref=f24e34]:
+          - generic [ref=f24e35]:
+            - button "Clear" [ref=f24e76] [cursor=pointer]:
+              - generic [ref=f24e77]: Clear
+            - button "Tutorial" [expanded] [ref=f24e79] [cursor=pointer]:
+              - img [ref=f24e80]
+          - button "Settings" [ref=f24e41] [cursor=pointer]:
+            - text: Settings
+            - img [ref=f24e43]
+      - main [ref=f24e47]:
+        - generic [ref=f24e49]:
+          - button "Skip to game" [ref=f24e83] [cursor=pointer]:
+            - generic [ref=f24e84]: Skip to game
+          - button "Keyboard introduction" [ref=f24e50] [cursor=pointer]:
+            - generic [ref=f24e51]: Keyboard introduction
+          - button "Close menu" [ref=f24e52] [cursor=pointer]:
+            - img [ref=f24e53]
+            - generic [ref=f24e55]: Close menu
+        - generic [ref=f24e85]:
+          - generic "Gameboard" [ref=f24e86]:
+            - generic [ref=f24e87]:
+              - button "Sun" [disabled] [ref=f24e88]:
+                - generic [ref=f24e89]:
+                  - img "Sun"
+              - generic [ref=f24e90]: Row 1, Column 1
+              - button "Empty" [ref=f24e91]:
+                - generic [ref=f24e92]:
+                  - img "Empty"
+              - generic [ref=f24e93]: Row 1, Column 2
+              - button "Empty Cross" [ref=f24e94]:
+                - generic [ref=f24e95]:
+                  - img "Empty"
+                - generic:
+                  - img "Cross"
+              - generic [ref=f24e96]: Row 1, Column 3
+              - button "Empty" [ref=f24e97]:
+                - generic [ref=f24e98]:
+                  - img "Empty"
+              - generic [ref=f24e99]: Row 1, Column 4
+              - button "Empty" [ref=f24e100]:
+                - generic [ref=f24e101]:
+                  - img "Empty"
+              - generic [ref=f24e102]: Row 1, Column 5
+              - button "Sun" [disabled] [ref=f24e103]:
+                - generic [ref=f24e104]:
+                  - img "Sun"
+              - generic [ref=f24e105]: Row 1, Column 6
+              - button "Empty" [ref=f24e106]:
+                - generic [ref=f24e107]:
+                  - img "Empty"
+              - generic [ref=f24e108]: Row 2, Column 1
+              - button "Sun" [disabled] [ref=f24e109]:
+                - generic [ref=f24e110]:
+                  - img "Sun"
+              - generic [ref=f24e111]: Row 2, Column 2
+              - button "Empty Cross" [ref=f24e112]:
+                - generic [ref=f24e113]:
+                  - img "Empty"
+                - generic:
+                  - img "Cross"
+              - generic [ref=f24e114]: Row 2, Column 3
+              - button "Empty" [ref=f24e115]:
+                - generic [ref=f24e116]:
+                  - img "Empty"
+              - generic [ref=f24e117]: Row 2, Column 4
+              - button "Moon" [disabled] [ref=f24e118]:
+                - generic [ref=f24e119]:
+                  - img "Moon"
+              - generic [ref=f24e120]: Row 2, Column 5
+              - button "Empty" [ref=f24e121]:
+                - generic [ref=f24e122]:
+                  - img "Empty"
+              - generic [ref=f24e123]: Row 2, Column 6
+              - button "Empty Equal" [ref=f24e124]:
+                - generic [ref=f24e125]:
+                  - img "Empty"
+                - generic:
+                  - img "Equal"
+              - generic [ref=f24e126]: Row 3, Column 1
+              - button "Empty Cross" [ref=f24e127]:
+                - generic [ref=f24e128]:
+                  - img "Empty"
+                - generic:
+                  - img "Cross"
+              - generic [ref=f24e129]: Row 3, Column 2
+              - button "Empty Equal" [ref=f24e130]:
+                - generic [ref=f24e131]:
+                  - img "Empty"
+                - generic:
+                  - img "Equal"
+              - generic [ref=f24e132]: Row 3, Column 3
+              - button "Empty Cross" [ref=f24e133]:
+                - generic [ref=f24e134]:
+                  - img "Empty"
+                - generic:
+                  - img "Cross"
+              - generic [ref=f24e135]: Row 3, Column 4
+              - button "Empty Cross" [ref=f24e136]:
+                - generic [ref=f24e137]:
+                  - img "Empty"
+                - generic:
+                  - img "Cross"
+              - generic [ref=f24e138]: Row 3, Column 5
+              - button "Empty Cross" [ref=f24e139]:
+                - generic [ref=f24e140]:
+                  - img "Empty"
+                - generic:
+                  - img "Cross"
+              - generic [ref=f24e141]: Row 3, Column 6
+              - button "Empty" [ref=f24e142]:
+                - generic [ref=f24e143]:
+                  - img "Empty"
+              - generic [ref=f24e144]: Row 4, Column 1
+              - button "Empty" [ref=f24e145]:
+                - generic [ref=f24e146]:
+                  - img "Empty"
+              - generic [ref=f24e147]: Row 4, Column 2
+              - button "Empty" [ref=f24e148]:
+                - generic [ref=f24e149]:
+                  - img "Empty"
+              - generic [ref=f24e150]: Row 4, Column 3
+              - button "Empty" [ref=f24e151]:
+                - generic [ref=f24e152]:
+                  - img "Empty"
+              - generic [ref=f24e153]: Row 4, Column 4
+              - button "Empty" [ref=f24e154]:
+                - generic [ref=f24e155]:
+                  - img "Empty"
+              - generic [ref=f24e156]: Row 4, Column 5
+              - button "Empty" [ref=f24e157]:
+                - generic [ref=f24e158]:
+                  - img "Empty"
+              - generic [ref=f24e159]: Row 4, Column 6
+              - button "Empty" [ref=f24e160]:
+                - generic [ref=f24e161]:
+                  - img "Empty"
+              - generic [ref=f24e162]: Row 5, Column 1
+              - button "Moon" [disabled] [ref=f24e163]:
+                - generic [ref=f24e164]:
+                  - img "Moon"
+              - generic [ref=f24e165]: Row 5, Column 2
+              - button "Empty Cross" [ref=f24e166]:
+                - generic [ref=f24e167]:
+                  - img "Empty"
+                - generic:
+                  - img "Cross"
+              - generic [ref=f24e168]: Row 5, Column 3
+              - button "Empty" [ref=f24e169]:
+                - generic [ref=f24e170]:
+                  - img "Empty"
+              - generic [ref=f24e171]: Row 5, Column 4
+              - button "Sun" [disabled] [ref=f24e172]:
+                - generic [ref=f24e173]:
+                  - img "Sun"
+              - generic [ref=f24e174]: Row 5, Column 5
+              - button "Empty" [ref=f24e175]:
+                - generic [ref=f24e176]:
+                  - img "Empty"
+              - generic [ref=f24e177]: Row 5, Column 6
+              - button "Moon" [disabled] [ref=f24e178]:
+                - generic [ref=f24e179]:
+                  - img "Moon"
+              - generic [ref=f24e180]: Row 6, Column 1
+              - button "Empty" [ref=f24e181]:
+                - generic [ref=f24e182]:
+                  - img "Empty"
+              - generic [ref=f24e183]: Row 6, Column 2
+              - button "Empty Equal" [ref=f24e184]:
+                - generic [ref=f24e185]:
+                  - img "Empty"
+                - generic:
+                  - img "Equal"
+              - generic [ref=f24e186]: Row 6, Column 3
+              - button "Empty" [ref=f24e187]:
+                - generic [ref=f24e188]:
+                  - img "Empty"
+              - generic [ref=f24e189]: Row 6, Column 4
+              - button "Empty" [ref=f24e190]:
+                - generic [ref=f24e191]:
+                  - img "Empty"
+              - generic [ref=f24e192]: Row 6, Column 5
+              - button "Sun" [disabled] [ref=f24e193]:
+                - generic [ref=f24e194]:
+                  - img "Sun"
+              - generic [ref=f24e195]: Row 6, Column 6
+          - region [ref=f24e196]
+          - generic [ref=f24e197]:
+            - button "Undo" [disabled] [ref=f24e199]:
+              - generic: Undo
+            - button "Hint" [ref=f24e201] [cursor=pointer]:
+              - generic [ref=f24e202]: Hint
+          - region [ref=f24e203]
+          - generic [ref=f24e204]:
+            - generic [ref=f24e205]:
+              - generic [ref=f24e206]: How to play
+              - button "Collapse game instructions" [expanded] [ref=f24e207] [cursor=pointer]:
+                - img [ref=f24e208]
+            - list [ref=f24e212]:
+              - listitem [ref=f24e213]:
+                - generic [ref=f24e214]:
+                  - text: Fill the grid so that each cell contains either a
+                  - img "Sun" [ref=f24e215]
+                  - text: or a
+                  - generic [ref=f24e218]:
+                    - img "Moon" [ref=f24e219]
+                    - text: .
+              - listitem [ref=f24e224]:
+                - generic [ref=f24e225]:
+                  - text: No more than 2
+                  - img "Sun" [ref=f24e226]
+                  - text: or
+                  - img "Moon" [ref=f24e229]
+                  - text: may be next to each other, either vertically or horizontally.
+                - listitem [ref=f24e234]:
+                  - img "Sun" [ref=f24e235]
+                  - img "Sun" [ref=f24e238]
+                  - img "Correct" [ref=f24e241]
+                - listitem [ref=f24e244]:
+                  - img "Sun" [ref=f24e245]
+                  - img "Sun" [ref=f24e248]
+                  - img "Sun" [ref=f24e251]
+                  - img "Incorrect" [ref=f24e254]
+              - listitem [ref=f24e257]:
+                - generic [ref=f24e258]:
+                  - text: Each row (and column) must contain the same number of
+                  - img "Sun" [ref=f24e259]
+                  - text: and
+                  - generic [ref=f24e262]:
+                    - img "Moon" [ref=f24e263]
+                    - text: .
+              - listitem [ref=f24e268]:
+                - generic [ref=f24e269]: Cells separated by an = sign must be of the same type.
+              - listitem [ref=f24e270]:
+                - generic [ref=f24e271]:
+                  - text: Cells separated by a
+                  - img "Cross" [ref=f24e272]
+                  - text: sign must be of the opposite type.
+              - listitem [ref=f24e274]:
+                - generic [ref=f24e275]: Each puzzle has one right answer and can be solved via deduction (you should never have to make a guess).
+    - tooltip "Dismiss Learn to play" [active] [ref=f24e276]:
+      - generic [ref=f24e277]:
+        - button "Dismiss" [ref=f24e278] [cursor=pointer]:
+          - img [ref=f24e280]
+        - generic [ref=f24e282]: Learn to play
+    - region [ref=f24e14]

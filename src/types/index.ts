@@ -25,8 +25,16 @@ export interface SolveResponse {
   error?: string;
 }
 
+/** Messages sent from content script to background (drag events for Zip) */
+export interface MouseEventMessage {
+  type: "MOUSE_EVENT";
+  eventType: string;
+  x: number;
+  y: number;
+}
+
 /** Union of all messages sent via chrome.runtime */
-export type Message = SolveMessage | ClickCellMessage;
+export type Message = SolveMessage | ClickCellMessage | MouseEventMessage;
 
 /** Queens game types */
 export interface QueensBoard {
@@ -51,5 +59,35 @@ export interface Position {
   col: number;
 }
 
-/** Display mode for showing the solution */
-export type SolveMode = "instant" | "animated";
+// ---- Zip game types ----
+
+/** A wall between two adjacent cells, blocking path movement */
+export interface Wall {
+  /** The cell that has this wall */
+  row: number;
+  col: number;
+  /** Which edge of the cell the wall is on */
+  direction: "top" | "bottom" | "left" | "right";
+}
+
+export interface ZipBoard {
+  /** Grid size (e.g. 7 means 7x7) */
+  size: number;
+  /**
+   * Map of checkpoint number to its position.
+   * The path must visit these in order: 1 → 2 → 3 → ...
+   */
+  checkpoints: Map<number, Position>;
+  /**
+   * Set of walls that block movement between adjacent cells.
+   * Encoded as "row,col,direction" strings for fast lookup.
+   */
+  walls: Set<string>;
+}
+
+export interface ZipSolution {
+  /** Ordered array of positions representing the complete path */
+  path: Position[];
+  /** Whether a valid solution was found */
+  solved: boolean;
+}
