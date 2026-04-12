@@ -93,6 +93,43 @@ export interface TangoSolution {
   solved: boolean;
 }
 
+// ---- Patches game types ----
+
+export type PatchesShape = "square" | "tall" | "wide" | "any";
+
+export interface PatchesClue {
+  /** Clue cell position */
+  row: number;
+  col: number;
+  /** Number of cells the region must contain */
+  area: number;
+  /** Shape constraint for the region */
+  shape: PatchesShape;
+}
+
+export interface PatchesBoard {
+  /** Grid size (e.g. 8 means 8x8) */
+  size: number;
+  /** Clue definitions */
+  clues: PatchesClue[];
+}
+
+export interface PatchesRect {
+  top: number;
+  left: number;
+  height: number;
+  width: number;
+}
+
+export interface PatchesSolution {
+  /** For each clue (by index), the rectangle it occupies */
+  rects: PatchesRect[];
+  /** 2D grid mapping each cell to a clue index */
+  grid: number[][];
+  /** Whether a valid solution was found */
+  solved: boolean;
+}
+
 // ---- Zip game types ----
 
 /** A wall between two adjacent cells, blocking path movement */

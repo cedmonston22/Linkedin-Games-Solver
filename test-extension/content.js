@@ -453,6 +453,166 @@ function solveTango(board) {
   return { grid: solved ? grid : [], solved: solved };
 }
 
+// ==== Patches Parser ====
+
+var PATCHES_CLUE_REGEX = /Row (\d+), column (\d+), (.+?) clue, (\d+) cells/;
+
+function parsePatchesShape(shapeText) {
+  if (shapeText === "square") return "square";
+  if (shapeText === "tall rectangle") return "tall";
+  if (shapeText === "wide rectangle") return "wide";
+  return "any";
+}
+
+function parsePatchesBoard() {
+  var grid = document.querySelector('[data-testid="interactive-grid"]');
+  if (!grid) return null;
+
+  var style = grid.getAttribute("style") || "";
+  var sizeMatch = style.match(/--_6afcf54e:\s*(\d+)/);
+  if (!sizeMatch) return null;
+  var size = parseInt(sizeMatch[1], 10);
+
+  var allPCells = grid.querySelectorAll('[data-testid^="cell-"]');
+  var cells = [];
+  for (var pci = 0; pci < allPCells.length; pci++) {
+    var ptid = allPCells[pci].getAttribute("data-testid") || "";
+    if (ptid.match(/^cell-\d+$/)) cells.push(allPCells[pci]);
+  }
+  if (cells.length !== size * size) return null;
+
+  var clues = [];
+  for (var i = 0; i < cells.length; i++) {
+    var ariaLabel = cells[i].getAttribute("aria-label") || "";
+    var match = PATCHES_CLUE_REGEX.exec(ariaLabel);
+    if (!match) continue;
+    clues.push({
+      row: parseInt(match[1], 10) - 1,
+      col: parseInt(match[2], 10) - 1,
+      shape: parsePatchesShape(match[3]),
+      area: parseInt(match[4], 10)
+    });
+  }
+
+  if (clues.length === 0) return null;
+  return { size: size, clues: clues };
+}
+
+// ==== Patches Solver ====
+
+function getPatchesFactorPairs(area, shape) {
+  var pairs = [];
+  for (var h = 1; h <= area; h++) {
+    if (area % h !== 0) continue;
+    var w = area / h;
+    if (shape === "square" && h === w) pairs.push([h, w]);
+    else if (shape === "tall" && h > w) pairs.push([h, w]);
+    else if (shape === "wide" && w > h) pairs.push([h, w]);
+    else if (shape === "any") pairs.push([h, w]);
+  }
+  return pairs;
+}
+
+function solvePatches(board) {
+  var size = board.size;
+  var clues = board.clues;
+
+  var grid = [];
+  for (var r = 0; r < size; r++) {
+    grid[r] = [];
+    for (var c = 0; c < size; c++) {
+      grid[r][c] = -1;
+    }
+  }
+  var rects = new Array(clues.length);
+
+  // Sort clues by most constrained first
+  var clueOrder = [];
+  for (var ci = 0; ci < clues.length; ci++) {
+    var clue = clues[ci];
+    var pairs = getPatchesFactorPairs(clue.area, clue.shape);
+    var count = 0;
+    for (var p = 0; p < pairs.length; p++) {
+      var ph = pairs[p][0], pw = pairs[p][1];
+      var minT = Math.max(0, clue.row - ph + 1);
+      var maxT = Math.min(size - ph, clue.row);
+      var minL = Math.max(0, clue.col - pw + 1);
+      var maxL = Math.min(size - pw, clue.col);
+      count += Math.max(0, maxT - minT + 1) * Math.max(0, maxL - minL + 1);
+    }
+    clueOrder.push({ idx: ci, count: count });
+  }
+  clueOrder.sort(function(a, b) { return a.count - b.count; });
+
+  function canPlace(top, left, h, w) {
+    if (top + h > size || left + w > size) return false;
+    for (var r = top; r < top + h; r++) {
+      for (var c = left; c < left + w; c++) {
+        if (grid[r][c] !== -1) return false;
+      }
+    }
+    return true;
+  }
+
+  function place(top, left, h, w, clueIdx) {
+    for (var r = top; r < top + h; r++) {
+      for (var c = left; c < left + w; c++) {
+        grid[r][c] = clueIdx;
+      }
+    }
+    rects[clueIdx] = { top: top, left: left, height: h, width: w };
+  }
+
+  function removeRect(top, left, h, w) {
+    for (var r = top; r < top + h; r++) {
+      for (var c = left; c < left + w; c++) {
+        grid[r][c] = -1;
+      }
+    }
+  }
+
+  function solve(orderIdx) {
+    if (orderIdx === clueOrder.length) {
+      for (var r = 0; r < size; r++) {
+        for (var c = 0; c < size; c++) {
+          if (grid[r][c] === -1) return false;
+        }
+      }
+      return true;
+    }
+
+    var clueIdx = clueOrder[orderIdx].idx;
+    var clue = clues[clueIdx];
+    var pairs = getPatchesFactorPairs(clue.area, clue.shape);
+
+    for (var p = 0; p < pairs.length; p++) {
+      var h = pairs[p][0], w = pairs[p][1];
+      var minTop = Math.max(0, clue.row - h + 1);
+      var maxTop = Math.min(size - h, clue.row);
+      var minLeft = Math.max(0, clue.col - w + 1);
+      var maxLeft = Math.min(size - w, clue.col);
+
+      for (var top = minTop; top <= maxTop; top++) {
+        for (var left = minLeft; left <= maxLeft; left++) {
+          if (canPlace(top, left, h, w)) {
+            place(top, left, h, w, clueIdx);
+            if (solve(orderIdx + 1)) return true;
+            removeRect(top, left, h, w);
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+  var solved = solve(0);
+  return {
+    rects: solved ? rects : [],
+    grid: solved ? grid : [],
+    solved: solved
+  };
+}
+
 // ==== Solver Dispatcher ====
 
 async function runQueensSolver() {
@@ -549,11 +709,45 @@ async function runTangoSolver() {
   return { success: true };
 }
 
+async function runPatchesSolver() {
+  var board = parsePatchesBoard();
+  if (!board) return null;
+
+  var solution = solvePatches(board);
+  if (!solution.solved) return { success: false, error: "No solution found" };
+
+  // For each clue, drag from clue cell through the rectangle corners
+  for (var i = 0; i < board.clues.length; i++) {
+    var clue = board.clues[i];
+    var rect = solution.rects[i];
+
+    var clueCenter = getCellCenter(clue.row, clue.col, board.size);
+    if (!clueCenter) continue;
+
+    var tlCenter = getCellCenter(rect.top, rect.left, board.size);
+    var brCenter = getCellCenter(rect.top + rect.height - 1, rect.left + rect.width - 1, board.size);
+    if (!tlCenter || !brCenter) continue;
+
+    // Start drag on clue cell, move to top-left, then to bottom-right
+    await sendMouseEvent("mousePressed", clueCenter.x, clueCenter.y);
+    await delay(30);
+    await sendMouseEvent("mouseMoved", tlCenter.x, tlCenter.y);
+    await delay(30);
+    await sendMouseEvent("mouseMoved", brCenter.x, brCenter.y);
+    await delay(30);
+    await sendMouseEvent("mouseReleased", brCenter.x, brCenter.y);
+    await delay(150);
+  }
+
+  return { success: true };
+}
+
 async function runSolver(game) {
   switch (game) {
     case "queens": return runQueensSolver();
     case "zip": return runZipSolver();
     case "tango": return runTangoSolver();
+    case "patches": return runPatchesSolver();
     default: return null;
   }
 }
@@ -567,6 +761,8 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
       } else {
         sendResponse({ success: false, error: "Failed to parse board" });
       }
+    }).catch(function(err) {
+      sendResponse({ success: false, error: "Error: " + err.message });
     });
     return true;
   }

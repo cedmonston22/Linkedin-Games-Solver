@@ -14,6 +14,9 @@ import { injectZipSolution } from "./zip/injector";
 import { parseTangoBoard } from "./tango/parser";
 import { solveTango } from "../solvers/tango";
 import { injectTangoSolution } from "./tango/injector";
+import { parsePatchesBoard } from "./patches/parser";
+import { solvePatches } from "../solvers/patches";
+import { injectPatchesSolution } from "./patches/injector";
 
 console.log("[LinkedIn Solver] Content script loaded");
 
@@ -50,6 +53,17 @@ async function runTangoSolver(): Promise<SolveResponse | null> {
   return { success: true };
 }
 
+async function runPatchesSolver(): Promise<SolveResponse | null> {
+  const board = parsePatchesBoard();
+  if (!board) return null;
+
+  const solution = solvePatches(board);
+  if (!solution.solved) return { success: false, error: "No solution found" };
+
+  await injectPatchesSolution(solution, board.size, board.clues);
+  return { success: true };
+}
+
 async function runSolver(game: string): Promise<SolveResponse | null> {
   switch (game) {
     case "queens":
@@ -58,6 +72,8 @@ async function runSolver(game: string): Promise<SolveResponse | null> {
       return runZipSolver();
     case "tango":
       return runTangoSolver();
+    case "patches":
+      return runPatchesSolver();
     default:
       return null;
   }

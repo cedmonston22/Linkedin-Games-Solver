@@ -68,7 +68,7 @@ Solvers take a typed board state and return a solution. Zero browser/DOM depende
 - **Queens (archivedqueens.com)**: Fully working. Parser reads CSS grid + `background-color`. Mousedown events.
 - **Zip (LinkedIn)**: Fully working. Parser reads `aria-label="Number X"` and `trail-cell-wall--{direction}` classes. Debugger API drag (mousePressed → mouseMoved → mouseReleased).
 - **Tango (LinkedIn)**: Fully working. Parser reads `lotka-cell-content` for Sun/Moon values and `lotka-cell-edge--{right|down}` with SVG `aria-label="Equal"/"Cross"` for constraints. Click-to-cycle injection (empty→sun→moon).
-- **Patches**: Not yet started.
+- **Patches (LinkedIn)**: Fully working. Parser reads `aria-label` for shape type/area. Solver uses backtracking to place rectangles. Drag injection from clue to opposite corner.
 
 ## DOM Parsing
 
