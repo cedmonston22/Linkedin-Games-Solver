@@ -1,0 +1,54 @@
+- iframe [active] [ref=e2]:
+  - generic [ref=f35e15]:
+    - generic:
+      - region "Toast message":
+        - heading "0 notifications total" [level=2] [ref=f35e2]
+        - alert
+    - generic [ref=f35e20]:
+      - generic [ref=f35e23]:
+        - generic [ref=f35e24]:
+          - button "Back" [ref=f35e25] [cursor=pointer]:
+            - img [ref=f35e26]
+          - img [ref=f35e29]
+          - generic [active] [ref=f35e31]: Zip
+        - generic [ref=f35e65]:
+          - text: Difficulty
+          - generic [ref=f35e66]: HARD
+        - generic [ref=f35e34]:
+          - generic [ref=f35e35]:
+            - button "Clear" [ref=f35e67] [cursor=pointer]:
+              - generic [ref=f35e68]: Clear
+            - button "Tutorial" [ref=f35e69] [cursor=pointer]:
+              - img [ref=f35e70]
+          - button "Settings" [ref=f35e41] [cursor=pointer]:
+            - text: Settings
+            - img [ref=f35e43]
+      - main [ref=f35e47]:
+        - generic [ref=f35e73]:
+          - generic [ref=f35e75]:
+            - generic [ref=f35e78]: "1"
+            - generic [ref=f35e92]: "5"
+            - generic [ref=f35e137]: "4"
+            - generic [ref=f35e146]: "3"
+            - generic [ref=f35e191]: "2"
+            - generic [ref=f35e204]: "6"
+          - generic [ref=f35e205]:
+            - button "Undo" [disabled] [ref=f35e207]:
+              - generic: Undo
+            - button "Hint" [ref=f35e209] [cursor=pointer]:
+              - generic [ref=f35e210]: Hint
+          - region [ref=f35e211]
+          - generic [ref=f35e212]:
+            - generic [ref=f35e213]:
+              - generic [ref=f35e214]: How to play
+              - button "Collapse game instructions" [expanded] [ref=f35e215] [cursor=pointer]:
+                - img [ref=f35e216]
+            - generic [ref=f35e220]:
+              - generic [ref=f35e221]:
+                - generic [ref=f35e222]:
+                  - generic [ref=f35e223]: "1"
+                  - generic [ref=f35e224]: "2"
+                  - generic [ref=f35e225]: "3"
+                - text: Connect the dots in order
+              - generic [ref=f35e227]: Fill every cell
+    - region [ref=f35e14]

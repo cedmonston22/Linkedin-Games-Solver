@@ -9,7 +9,8 @@
       "Bash(npx vitest:*)",
       "Bash(npm run:*)",
       "Bash(npm test:*)",
-      "mcp__playwright__browser_click"
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_run_code"
     ]
   }
 }

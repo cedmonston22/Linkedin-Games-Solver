@@ -1,0 +1,8 @@
+- iframe [ref=e2]:
+  - generic [active]:
+    - generic:
+      - region "Toast message":
+        - heading "0 notifications total" [level=2] [ref=f46e2]
+        - alert
+    - img [ref=f46e8]
+    - region [ref=f46e14]

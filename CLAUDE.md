@@ -67,7 +67,8 @@ Solvers take a typed board state and return a solution. Zero browser/DOM depende
 - **Queens (LinkedIn)**: Fully working. Parser reads `aria-label` attributes. Debugger API clicks.
 - **Queens (archivedqueens.com)**: Fully working. Parser reads CSS grid + `background-color`. Mousedown events.
 - **Zip (LinkedIn)**: Fully working. Parser reads `aria-label="Number X"` and `trail-cell-wall--{direction}` classes. Debugger API drag (mousePressed → mouseMoved → mouseReleased).
-- **Tango, Patches**: Not yet started.
+- **Tango (LinkedIn)**: Fully working. Parser reads `lotka-cell-content` for Sun/Moon values and `lotka-cell-edge--{right|down}` with SVG `aria-label="Equal"/"Cross"` for constraints. Click-to-cycle injection (empty→sun→moon).
+- **Patches**: Not yet started.
 
 ## DOM Parsing
 
@@ -90,3 +91,13 @@ Solvers take a typed board state and return a solution. Zero browser/DOM depende
 - Walls: child `<div>` elements with class `trail-cell-wall--{right|left|top|bottom}` (unobfuscated) or `_63fae645` (right) / `_6177935e` (left) (obfuscated)
 - Walls come in pairs: if cell (r,c) has `wall--right`, then cell (r,c+1) has `wall--left`
 - Input: dragging (mousePressed → mouseMoved through path → mouseReleased)
+
+### LinkedIn Tango
+- Internal name: "lotka"
+- Board: `.grid-board-wrapper` with `.lotka-cell` children having `data-cell-idx`
+- Cell values: `.lotka-cell-content` with text "Sun", "Moon", or SVG `aria-label="Empty"`
+- Locked cells: `.lotka-cell-content--locked`
+- Edge constraints: `.lotka-cell-edge--right` (horizontal) or `.lotka-cell-edge--down` (vertical)
+- Constraint type: SVG child with `aria-label="Equal"` (=, same) or `aria-label="Cross"` (x, different)
+- Input: clicking cycles Empty → Sun → Moon → Empty (1 click = Sun, 2 clicks = Moon)
+- Rules: equal Sun/Moon per row/col, no 3 consecutive same, edge constraints

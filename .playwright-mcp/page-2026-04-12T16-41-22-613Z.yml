@@ -1,0 +1,226 @@
+- iframe [active] [ref=e2]:
+  - generic [ref=f46e15]:
+    - generic:
+      - region "Toast message":
+        - heading "0 notifications total" [level=2] [ref=f46e2]
+        - alert
+    - generic [ref=f46e20]:
+      - generic [ref=f46e23]:
+        - generic [ref=f46e24]:
+          - button [ref=f46e62] [cursor=pointer]:
+            - img [ref=f46e26]
+          - img [ref=f46e29]
+          - generic [ref=f46e31]: Queens
+        - generic [ref=f46e66]:
+          - text: Difficulty
+          - generic [ref=f46e67]: HARD
+        - generic [ref=f46e34]:
+          - generic [ref=f46e35]:
+            - button [ref=f46e68] [cursor=pointer]:
+              - generic [ref=f46e69]: Clear
+            - button [ref=f46e70] [cursor=pointer]:
+              - img [ref=f46e71]
+          - button [ref=f46e74] [cursor=pointer]:
+            - text: Settings
+            - img [ref=f46e43]
+      - main [ref=f46e47]:
+        - generic [ref=f46e75]:
+          - note [ref=f46e76]:
+            - generic [ref=f46e77]:
+              - button [ref=f46e78]
+              - button [ref=f46e79]
+              - button [ref=f46e80]
+              - button [ref=f46e81]
+              - button [disabled] [ref=f46e82]:
+                - generic:
+                  - generic:
+                    - img
+              - button [ref=f46e83]
+              - button [ref=f46e84]
+              - button [ref=f46e85]
+              - button [ref=f46e86]
+              - button [ref=f46e87]
+              - button [ref=f46e88]
+              - button [ref=f46e89]
+              - button [ref=f46e90]
+              - button [ref=f46e91]
+              - button [ref=f46e92]
+              - button [ref=f46e93]
+              - button [disabled] [ref=f46e94]:
+                - generic:
+                  - generic:
+                    - img
+              - button [ref=f46e95]
+              - button [ref=f46e96]
+              - button [ref=f46e97]
+              - button [ref=f46e98]
+              - button [ref=f46e99]
+              - button [ref=f46e100]
+              - button [ref=f46e101]
+              - button [ref=f46e102]
+              - button [ref=f46e103]
+              - button [ref=f46e104]
+              - button [ref=f46e105]
+              - button [ref=f46e106]
+              - button [ref=f46e107]
+              - button [ref=f46e108]
+              - button [ref=f46e109]
+              - button [ref=f46e110]
+              - button [ref=f46e111]
+              - button [ref=f46e112]
+              - button [ref=f46e113]
+              - button [ref=f46e114]
+              - button [ref=f46e115]
+              - button [ref=f46e116]
+              - button [ref=f46e117]
+              - button [ref=f46e118]
+              - button [ref=f46e119]
+              - button [ref=f46e120]
+              - button [ref=f46e121]
+              - button [ref=f46e122]
+              - button [ref=f46e123]
+              - button [ref=f46e124]
+              - button [ref=f46e125]
+              - button [ref=f46e126]
+              - button [ref=f46e127]
+              - button [ref=f46e128]
+              - button [ref=f46e129]
+              - button [ref=f46e130]
+              - button [ref=f46e131]
+              - button [ref=f46e132]
+              - button [ref=f46e133]
+              - button [ref=f46e134]
+              - button [ref=f46e135]
+              - button [ref=f46e136]
+              - button [ref=f46e137]
+              - button [ref=f46e138]
+              - button [ref=f46e139]
+              - button [ref=f46e140]
+              - button [ref=f46e141]
+              - button [ref=f46e142]
+              - button [ref=f46e143]
+              - button [ref=f46e144]
+              - button [ref=f46e145]
+              - button [ref=f46e146]
+              - button [ref=f46e147]
+              - button [ref=f46e148]
+              - button [ref=f46e149]
+              - button [ref=f46e150]
+              - button [ref=f46e151]
+              - button [ref=f46e152]
+              - button [ref=f46e153]
+              - button [ref=f46e154]
+              - button [ref=f46e155]
+              - button [ref=f46e156]
+              - button [ref=f46e157]
+              - button [ref=f46e158]
+              - region [ref=f46e159]
+          - generic [ref=f46e160]:
+            - button [disabled] [ref=f46e162]:
+              - generic: Undo
+            - button [ref=f46e164] [cursor=pointer]:
+              - generic [ref=f46e165]: Hint
+          - region [ref=f46e166]
+          - generic [ref=f46e168]:
+            - generic [ref=f46e169]: 🎉 Welcome, guest player!
+            - button [ref=f46e170] [cursor=pointer]:
+              - img [ref=f46e171]
+          - generic [ref=f46e174]:
+            - generic [ref=f46e175]:
+              - generic [ref=f46e176]: How to play
+              - button [expanded] [ref=f46e177] [cursor=pointer]:
+                - img [ref=f46e178]
+            - list [ref=f46e182]:
+              - listitem [ref=f46e183]:
+                - text: Your goal is to have exactly one
+                - img [ref=f46e184]
+                - text: in each row, column, and color region.
+              - listitem [ref=f46e187]:
+                - text: Tap once to place X and tap twice for
+                - generic [ref=f46e188]:
+                  - img [ref=f46e189]
+                  - text: .
+                - text: Use X to mark where
+                - img [ref=f46e192]
+                - text: cannot be placed.
+              - listitem [ref=f46e195]:
+                - text: Two
+                - img [ref=f46e196]
+                - text: cannot touch each other, not even diagonally.
+          - generic [ref=f46e199]:
+            - generic [ref=f46e200]:
+              - generic [ref=f46e201]: Examples
+              - button [expanded] [ref=f46e202] [cursor=pointer]:
+                - img [ref=f46e203]
+            - generic [ref=f46e207]:
+              - generic [ref=f46e208]:
+                - list [ref=f46e209]:
+                  - listitem [ref=f46e210]:
+                    - generic [ref=f46e212]:
+                      - img [ref=f46e213]
+                      - generic [ref=f46e214]:
+                        - text: Each row can only have one
+                        - generic [ref=f46e215]:
+                          - img [ref=f46e216]
+                          - text: .
+                  - listitem [ref=f46e219]:
+                    - generic [ref=f46e221]:
+                      - img [ref=f46e222]
+                      - generic [ref=f46e223]:
+                        - text: Each column can also only have one
+                        - generic [ref=f46e224]:
+                          - img [ref=f46e225]
+                          - text: .
+                  - listitem [ref=f46e228]:
+                    - generic [ref=f46e230]:
+                      - img [ref=f46e231]
+                      - generic [ref=f46e232]:
+                        - text: Each color region can also only have one
+                        - generic [ref=f46e233]:
+                          - img [ref=f46e234]
+                          - text: .
+                  - listitem [ref=f46e237]:
+                    - generic [ref=f46e239]:
+                      - img [ref=f46e240]
+                      - generic [ref=f46e241]:
+                        - text: Two
+                        - img [ref=f46e242]
+                        - text: cannot touch each other, not even diagonally.
+                - generic [ref=f46e245]:
+                  - button [disabled] [ref=f46e246]:
+                    - img
+                  - button [ref=f46e247] [cursor=pointer]:
+                    - img [ref=f46e248]
+                  - generic [ref=f46e251]: Page 1 of 4
+              - list [ref=f46e254]:
+                - listitem [ref=f46e255]:
+                  - button [ref=f46e256] [cursor=pointer]:
+                    - generic [ref=f46e257]: "1"
+                - listitem [ref=f46e258]:
+                  - button [ref=f46e259] [cursor=pointer]:
+                    - generic [ref=f46e260]: "2"
+                - listitem [ref=f46e261]:
+                  - button [ref=f46e262] [cursor=pointer]:
+                    - generic [ref=f46e263]: "3"
+                - listitem [ref=f46e264]:
+                  - button [ref=f46e265] [cursor=pointer]:
+                    - generic [ref=f46e266]: "4"
+    - dialog "How to play Queens" [ref=f46e270]:
+      - generic [ref=f46e271]: Dialog content start.
+      - button "Dismiss" [active] [ref=f46e272] [cursor=pointer]:
+        - img [ref=f46e273]
+      - heading "How to play Queens" [level=2] [ref=f46e277]
+      - article [ref=f46e279]:
+        - generic [ref=f46e280]:
+          - button "Tutorial slide 1, The goal is to have exactly one queen in each row, column, and color region - with no queen touching each other. There is only one right answer, and no guessing is needed. Let’s walk through how this works. Double tap to move to slide 2" [ref=f46e284]
+          - paragraph [ref=f46e288]:
+            - generic [ref=f46e289]:
+              - text: The goal is to have exactly one
+              - img "Queen" [ref=f46e290]
+              - text: in each row, column, and color region - with no
+              - img "Queen" [ref=f46e293]
+              - text: touching each other. There is only one right answer, and no guessing is needed. Let’s walk through how this works.
+          - button "Start tutorial" [ref=f46e297] [cursor=pointer]:
+            - generic [ref=f46e298]: Start tutorial
+      - generic [ref=f46e299]: Dialog content end.
+    - region [ref=f46e14]

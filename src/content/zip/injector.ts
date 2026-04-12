@@ -1,8 +1,5 @@
 import type { ZipSolution, ClickCellResponse } from "../../types";
 
-/**
- * Sends a mouse event to the background worker via Chrome Debugger API.
- */
 function sendMouseEvent(
   type: string,
   x: number,
@@ -18,12 +15,12 @@ function sendMouseEvent(
   });
 }
 
-/**
- * Gets the center coordinates of a cell element in viewport space.
- */
 function getCellCenter(
-  idx: number
+  row: number,
+  col: number,
+  size: number
 ): { x: number; y: number } | null {
+  const idx = row * size + col;
   const cell = document.querySelector<HTMLElement>(
     `[data-testid="cell-${idx}"]`
   );
@@ -35,14 +32,6 @@ function getCellCenter(
   };
 }
 
-/**
- * Injects the Zip solution by simulating a drag gesture along the path.
- *
- * Zip requires dragging through cells in order. We simulate:
- * 1. mousePressed on the first cell
- * 2. mouseMoved through each subsequent cell
- * 3. mouseReleased on the last cell
- */
 export async function injectZipSolution(
   solution: ZipSolution,
   size: number
@@ -50,32 +39,23 @@ export async function injectZipSolution(
   if (solution.path.length === 0) return;
 
   const first = solution.path[0]!;
-  const firstIdx = first.row * size + first.col;
-  const startCenter = getCellCenter(firstIdx);
+  const startCenter = getCellCenter(first.row, first.col, size);
   if (!startCenter) return;
 
-  // Mouse down on first cell
   await sendMouseEvent("mousePressed", startCenter.x, startCenter.y);
-
-  // Small delay to let the game register the press
   await new Promise((r) => setTimeout(r, 50));
 
-  // Move through each subsequent cell
   for (let i = 1; i < solution.path.length; i++) {
     const pos = solution.path[i]!;
-    const idx = pos.row * size + pos.col;
-    const center = getCellCenter(idx);
-    if (!center) continue;
-
-    await sendMouseEvent("mouseMoved", center.x, center.y);
-    // Small delay between moves so the game can process each cell
-    await new Promise((r) => setTimeout(r, 30));
+    const center = getCellCenter(pos.row, pos.col, size);
+    if (center) {
+      await sendMouseEvent("mouseMoved", center.x, center.y);
+      await new Promise((r) => setTimeout(r, 30));
+    }
   }
 
-  // Mouse up on last cell
   const last = solution.path[solution.path.length - 1]!;
-  const lastIdx = last.row * size + last.col;
-  const endCenter = getCellCenter(lastIdx);
+  const endCenter = getCellCenter(last.row, last.col, size);
   if (endCenter) {
     await sendMouseEvent("mouseReleased", endCenter.x, endCenter.y);
   }

@@ -11,12 +11,15 @@ import { injectQueensSolution } from "./queens/injector";
 import { parseZipBoard } from "./zip/parser";
 import { solveZip } from "../solvers/zip";
 import { injectZipSolution } from "./zip/injector";
+import { parseTangoBoard } from "./tango/parser";
+import { solveTango } from "../solvers/tango";
+import { injectTangoSolution } from "./tango/injector";
 
 console.log("[LinkedIn Solver] Content script loaded");
 
-async function runQueensSolver(): Promise<SolveResponse> {
+async function runQueensSolver(): Promise<SolveResponse | null> {
   const board = parseQueensBoard();
-  if (!board) return { success: false, error: "Failed to parse board" };
+  if (!board) return null;
 
   const solution = solveQueens(board);
   if (!solution.solved) return { success: false, error: "No solution found" };
@@ -25,9 +28,9 @@ async function runQueensSolver(): Promise<SolveResponse> {
   return { success: true };
 }
 
-async function runZipSolver(): Promise<SolveResponse> {
+async function runZipSolver(): Promise<SolveResponse | null> {
   const board = parseZipBoard();
-  if (!board) return { success: false, error: "Failed to parse board" };
+  if (!board) return null;
 
   const solution = solveZip(board);
   if (!solution.solved) return { success: false, error: "No solution found" };
@@ -36,14 +39,27 @@ async function runZipSolver(): Promise<SolveResponse> {
   return { success: true };
 }
 
-async function runSolver(game: string): Promise<SolveResponse> {
+async function runTangoSolver(): Promise<SolveResponse | null> {
+  const board = parseTangoBoard();
+  if (!board) return null;
+
+  const solution = solveTango(board);
+  if (!solution.solved) return { success: false, error: "No solution found" };
+
+  await injectTangoSolution(solution, board.size, board.grid);
+  return { success: true };
+}
+
+async function runSolver(game: string): Promise<SolveResponse | null> {
   switch (game) {
     case "queens":
       return runQueensSolver();
     case "zip":
       return runZipSolver();
+    case "tango":
+      return runTangoSolver();
     default:
-      return { success: false, error: `Unknown game: ${game}` };
+      return null;
   }
 }
 
@@ -52,9 +68,9 @@ chrome.runtime.onMessage.addListener(
   (message, _sender, sendResponse: (response: SolveResponse) => void) => {
     if (message.type === "SOLVE") {
       runSolver(message.game).then((result) => {
-        sendResponse(result);
+        sendResponse(result ?? { success: false, error: "Failed to parse board" });
       });
-      return true; // keep sendResponse alive for async
+      return true;
     }
     return undefined;
   }

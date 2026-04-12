@@ -59,6 +59,40 @@ export interface Position {
   col: number;
 }
 
+// ---- Tango game types ----
+
+export type TangoValue = "sun" | "moon";
+
+export interface TangoConstraint {
+  /** First cell */
+  r1: number;
+  c1: number;
+  /** Second cell (adjacent) */
+  r2: number;
+  c2: number;
+  /** "same" = must match, "different" = must differ */
+  type: "same" | "different";
+}
+
+export interface TangoBoard {
+  /** Grid size (e.g. 6 means 6x6) */
+  size: number;
+  /**
+   * 2D array of pre-filled values. null = empty.
+   * grid[row][col]
+   */
+  grid: (TangoValue | null)[][];
+  /** Constraints between adjacent cells */
+  constraints: TangoConstraint[];
+}
+
+export interface TangoSolution {
+  /** Completed grid with all cells filled */
+  grid: TangoValue[][];
+  /** Whether a valid solution was found */
+  solved: boolean;
+}
+
 // ---- Zip game types ----
 
 /** A wall between two adjacent cells, blocking path movement */

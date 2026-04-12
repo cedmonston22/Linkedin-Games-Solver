@@ -33,6 +33,8 @@ function parseQueensBoard() {
     if (parsed.col > maxCol) maxCol = parsed.col;
   }
 
+  if (parsedCells.length === 0) return null;
+
   var size = maxRow;
   var colorToRegion = {};
   var nextRegionId = 0;
@@ -100,7 +102,7 @@ function solveQueens(board) {
   return { queens: solved ? queens.slice() : [], solved: solved };
 }
 
-// ==== Queens Injector ====
+// ==== Shared Helpers ====
 
 function sendClick(x, y) {
   return new Promise(function(resolve) {
@@ -108,6 +110,19 @@ function sendClick(x, y) {
       setTimeout(function() { resolve(response); }, 200);
     });
   });
+}
+
+function sendMouseEvent(eventType, x, y) {
+  return new Promise(function(resolve) {
+    chrome.runtime.sendMessage(
+      { type: "MOUSE_EVENT", eventType: eventType, x: x, y: y },
+      function(response) { resolve(response); }
+    );
+  });
+}
+
+function delay(ms) {
+  return new Promise(function(resolve) { setTimeout(resolve, ms); });
 }
 
 function getCellCenter(row, col, size) {
@@ -129,37 +144,29 @@ function encodeWall(row, col, direction) {
 
 function parseZipBoard() {
   var grid = document.querySelector('[data-testid="interactive-grid"]');
-  if (!grid) {
-    console.error("[LinkedIn Solver] No interactive grid found");
-    return null;
-  }
+  if (!grid) return null;
 
   var style = grid.getAttribute("style") || "";
   var sizeMatch = style.match(/--_6afcf54e:\s*(\d+)/);
-  if (!sizeMatch) {
-    console.error("[LinkedIn Solver] Could not determine grid size");
-    return null;
-  }
+  if (!sizeMatch) return null;
   var size = parseInt(sizeMatch[1], 10);
 
   var cells = grid.querySelectorAll('[data-testid^="cell-"]');
-  if (cells.length !== size * size) {
-    console.error("[LinkedIn Solver] Expected " + (size * size) + " cells, found " + cells.length);
-    return null;
-  }
+  if (cells.length !== size * size) return null;
 
   var checkpoints = {};
   var walls = {};
 
   for (var i = 0; i < cells.length; i++) {
     var cell = cells[i];
-    var idxAttr = cell.getAttribute("data-cell-idx");
-    if (idxAttr === null) continue;
-    var idx = parseInt(idxAttr, 10);
+    var testId = cell.getAttribute("data-testid") || "";
+    var idxMatch = testId.match(/cell-(\d+)/);
+    if (!idxMatch) continue;
+    var idx = parseInt(idxMatch[1], 10);
     var row = Math.floor(idx / size);
     var col = idx % size;
 
-    // Check for numbered checkpoint
+    // Check for numbered checkpoint via aria-label
     var ariaLabel = cell.getAttribute("aria-label");
     if (ariaLabel) {
       var numMatch = ariaLabel.match(/Number\s+(\d+)/);
@@ -168,26 +175,16 @@ function parseZipBoard() {
       }
     }
 
-    // Check for walls
-    var divs = cell.querySelectorAll("div");
-    for (var d = 0; d < divs.length; d++) {
-      var cls = divs[d].className;
-      if (cls.indexOf("trail-cell-wall--right") !== -1 || cls.indexOf("_63fae645") !== -1) {
-        walls[encodeWall(row, col, "right")] = true;
-      }
-      if (cls.indexOf("trail-cell-wall--left") !== -1 || cls.indexOf("_6177935e") !== -1) {
-        walls[encodeWall(row, col, "left")] = true;
-      }
-      if (cls.indexOf("trail-cell-wall--top") !== -1) {
-        walls[encodeWall(row, col, "top")] = true;
-      }
-      if (cls.indexOf("trail-cell-wall--bottom") !== -1) {
-        walls[encodeWall(row, col, "bottom")] = true;
-      }
+    // Check for walls — look for child divs with wall classes
+    var allDivs = cell.querySelectorAll("div");
+    for (var d = 0; d < allDivs.length; d++) {
+      var cls = allDivs[d].className;
+      // Obfuscated class names from LinkedIn's build
+      if (cls.indexOf("_63fae645") !== -1) walls[encodeWall(row, col, "right")] = true;
+      if (cls.indexOf("_6177935e") !== -1) walls[encodeWall(row, col, "left")] = true;
     }
   }
 
-  console.log("[LinkedIn Solver] Parsed " + size + "x" + size + " Zip board");
   return { size: size, checkpoints: checkpoints, walls: walls };
 }
 
@@ -199,7 +196,6 @@ function solveZip(board) {
   var walls = board.walls;
   var totalCells = size * size;
 
-  // Build checkpoint lookup
   var checkpointAt = {};
   var maxCheckpoint = 0;
   for (var num in checkpoints) {
@@ -221,18 +217,10 @@ function solveZip(board) {
   var DIRS = [[-1, 0], [1, 0], [0, -1], [0, 1]];
 
   function isBlocked(r1, c1, r2, c2) {
-    if (r2 === r1 && c2 === c1 + 1) {
-      return walls[encodeWall(r1, c1, "right")] || walls[encodeWall(r2, c2, "left")];
-    }
-    if (r2 === r1 && c2 === c1 - 1) {
-      return walls[encodeWall(r1, c1, "left")] || walls[encodeWall(r2, c2, "right")];
-    }
-    if (r2 === r1 + 1 && c2 === c1) {
-      return walls[encodeWall(r1, c1, "bottom")] || walls[encodeWall(r2, c2, "top")];
-    }
-    if (r2 === r1 - 1 && c2 === c1) {
-      return walls[encodeWall(r1, c1, "top")] || walls[encodeWall(r2, c2, "bottom")];
-    }
+    if (r2 === r1 && c2 === c1 + 1) return walls[encodeWall(r1, c1, "right")] || walls[encodeWall(r2, c2, "left")];
+    if (r2 === r1 && c2 === c1 - 1) return walls[encodeWall(r1, c1, "left")] || walls[encodeWall(r2, c2, "right")];
+    if (r2 === r1 + 1 && c2 === c1) return walls[encodeWall(r1, c1, "bottom")] || walls[encodeWall(r2, c2, "top")];
+    if (r2 === r1 - 1 && c2 === c1) return walls[encodeWall(r1, c1, "top")] || walls[encodeWall(r2, c2, "bottom")];
     return true;
   }
 
@@ -241,9 +229,7 @@ function solveZip(board) {
     if (visited[row][col]) return false;
 
     var cpNum = checkpointAt[row + "," + col];
-    if (cpNum !== undefined) {
-      if (cpNum !== nextCheckpoint) return false;
-    }
+    if (cpNum !== undefined && cpNum !== nextCheckpoint) return false;
 
     visited[row][col] = true;
     path.push({ row: row, col: col });
@@ -278,36 +264,200 @@ function solveZip(board) {
   return { path: solved ? path.slice() : [], solved: solved };
 }
 
-// ==== Zip Injector ====
+// ==== Tango Parser ====
 
-function sendMouseEvent(eventType, x, y) {
-  return new Promise(function(resolve) {
-    chrome.runtime.sendMessage(
-      { type: "MOUSE_EVENT", eventType: eventType, x: x, y: y },
-      function(response) { resolve(response); }
-    );
-  });
+function parseTangoBoard() {
+  var grid = document.querySelector('[data-testid="interactive-grid"]');
+  if (!grid) return null;
+
+  var style = grid.getAttribute("style") || "";
+  var sizeMatch = style.match(/--_6afcf54e:\s*(\d+)/);
+  if (!sizeMatch) return null;
+  var size = parseInt(sizeMatch[1], 10);
+
+  // Filter to only game cells (exclude "How to play" example cells)
+  var allCells = grid.querySelectorAll('[data-testid^="cell-"]');
+  var cells = [];
+  for (var ci = 0; ci < allCells.length; ci++) {
+    var tid = allCells[ci].getAttribute("data-testid") || "";
+    if (tid.match(/^cell-\d+$/)) cells.push(allCells[ci]);
+  }
+  if (cells.length !== size * size) return null;
+
+  var board = [];
+  for (var r = 0; r < size; r++) {
+    board[r] = [];
+    for (var c = 0; c < size; c++) {
+      board[r][c] = null;
+    }
+  }
+
+  var constraints = [];
+
+  for (var i = 0; i < cells.length; i++) {
+    var cell = cells[i];
+    var testId = cell.getAttribute("data-testid") || "";
+    var idxMatch = testId.match(/cell-(\d+)/);
+    if (!idxMatch) continue;
+    var idx = parseInt(idxMatch[1], 10);
+    var row = Math.floor(idx / size);
+    var col = idx % size;
+
+    // Read cell value from SVG aria-label inside the cell
+    var svgs = cell.querySelectorAll('svg[aria-label]');
+    for (var s = 0; s < svgs.length; s++) {
+      var svgLabel = svgs[s].getAttribute("aria-label");
+      if (svgLabel === "Sun") board[row][col] = "sun";
+      else if (svgLabel === "Moon") board[row][col] = "moon";
+    }
+
+    // Read constraint markers — SVGs with aria-label "Equal" or "Cross"
+    // These are on edge elements between cells
+    var edgeSvgs = cell.querySelectorAll('svg[aria-label="Equal"], svg[aria-label="Cross"]');
+    for (var e = 0; e < edgeSvgs.length; e++) {
+      var edgeSvg = edgeSvgs[e];
+      var edgeLabel = edgeSvg.getAttribute("aria-label");
+      var type = (edgeLabel === "Equal") ? "same" : "different";
+
+      // Determine direction by checking the parent edge element's class
+      var edgeParent = edgeSvg.parentElement;
+      if (!edgeParent) continue;
+      var parentClass = edgeParent.className || "";
+
+      var r2 = row, c2 = col;
+      // Check for right/down indicators in class names (obfuscated or not)
+      // Right edges connect (row, col) to (row, col+1)
+      // Down edges connect (row, col) to (row+1, col)
+      // We detect direction by the edge element's position/class
+      if (parentClass.indexOf("--right") !== -1 || parentClass.indexOf("_63fae645") !== -1) {
+        c2 = col + 1;
+      } else if (parentClass.indexOf("--down") !== -1 || parentClass.indexOf("_6177935e") !== -1) {
+        r2 = row + 1;
+      } else {
+        // Try to detect from position: get bounding rects
+        var cellRect = cell.getBoundingClientRect();
+        var edgeRect = edgeParent.getBoundingClientRect();
+        var edgeCenterX = edgeRect.left + edgeRect.width / 2;
+        var edgeCenterY = edgeRect.top + edgeRect.height / 2;
+        if (Math.abs(edgeCenterX - cellRect.right) < Math.abs(edgeCenterY - cellRect.bottom)) {
+          c2 = col + 1; // right edge
+        } else {
+          r2 = row + 1; // bottom edge
+        }
+      }
+
+      if (r2 < size && c2 < size && (r2 !== row || c2 !== col)) {
+        constraints.push({ r1: row, c1: col, r2: r2, c2: c2, type: type });
+      }
+    }
+  }
+
+  return { size: size, grid: board, constraints: constraints };
 }
 
-function getCellCenterByIdx(idx) {
-  var cell = document.querySelector('[data-testid="cell-' + idx + '"]');
-  if (!cell) return null;
-  var rect = cell.getBoundingClientRect();
-  return {
-    x: Math.round(rect.left + rect.width / 2),
-    y: Math.round(rect.top + rect.height / 2)
-  };
-}
+// ==== Tango Solver ====
 
-function delay(ms) {
-  return new Promise(function(resolve) { setTimeout(resolve, ms); });
+function solveTango(board) {
+  var size = board.size;
+  var initial = board.grid;
+  var constraints = board.constraints;
+  var half = size / 2;
+  var VALUES = ['sun', 'moon'];
+
+  var grid = [];
+  for (var r = 0; r < size; r++) {
+    grid[r] = initial[r].slice();
+  }
+
+  var constraintMap = {};
+  for (var ci = 0; ci < constraints.length; ci++) {
+    var con = constraints[ci];
+    var k1 = con.r1 + ',' + con.c1;
+    var k2 = con.r2 + ',' + con.c2;
+    if (!constraintMap[k1]) constraintMap[k1] = [];
+    if (!constraintMap[k2]) constraintMap[k2] = [];
+    constraintMap[k1].push({ r2: con.r2, c2: con.c2, type: con.type });
+    constraintMap[k2].push({ r2: con.r1, c2: con.c1, type: con.type });
+  }
+
+  var rowCount = { sun: [], moon: [] };
+  var colCount = { sun: [], moon: [] };
+  for (var i = 0; i < size; i++) {
+    rowCount.sun[i] = 0; rowCount.moon[i] = 0;
+    colCount.sun[i] = 0; colCount.moon[i] = 0;
+  }
+  for (var r2 = 0; r2 < size; r2++) {
+    for (var c2 = 0; c2 < size; c2++) {
+      var v = grid[r2][c2];
+      if (v) { rowCount[v][r2]++; colCount[v][c2]++; }
+    }
+  }
+
+  function checkThree(row, col, val) {
+    if (col >= 2 && grid[row][col-1] === val && grid[row][col-2] === val) return false;
+    if (col >= 1 && col < size-1 && grid[row][col-1] === val && grid[row][col+1] === val) return false;
+    if (col < size-2 && grid[row][col+1] === val && grid[row][col+2] === val) return false;
+    if (row >= 2 && grid[row-1][col] === val && grid[row-2][col] === val) return false;
+    if (row >= 1 && row < size-1 && grid[row-1][col] === val && grid[row+1][col] === val) return false;
+    if (row < size-2 && grid[row+1][col] === val && grid[row+2][col] === val) return false;
+    return true;
+  }
+
+  function checkCons(row, col, val) {
+    var key = row + ',' + col;
+    var related = constraintMap[key];
+    if (!related) return true;
+    for (var i = 0; i < related.length; i++) {
+      var other = grid[related[i].r2][related[i].c2];
+      if (other === null) continue;
+      if (related[i].type === 'same' && other !== val) return false;
+      if (related[i].type === 'different' && other === val) return false;
+    }
+    return true;
+  }
+
+  function canPlace(row, col, val) {
+    if (rowCount[val][row] >= half) return false;
+    if (colCount[val][col] >= half) return false;
+    if (!checkThree(row, col, val)) return false;
+    if (!checkCons(row, col, val)) return false;
+    return true;
+  }
+
+  var emptyCells = [];
+  for (var er = 0; er < size; er++) {
+    for (var ec = 0; ec < size; ec++) {
+      if (grid[er][ec] === null) emptyCells.push({ row: er, col: ec });
+    }
+  }
+
+  function solve(idx) {
+    if (idx === emptyCells.length) return true;
+    var cell = emptyCells[idx];
+    for (var vi = 0; vi < VALUES.length; vi++) {
+      var val = VALUES[vi];
+      if (canPlace(cell.row, cell.col, val)) {
+        grid[cell.row][cell.col] = val;
+        rowCount[val][cell.row]++;
+        colCount[val][cell.col]++;
+        if (solve(idx + 1)) return true;
+        grid[cell.row][cell.col] = null;
+        rowCount[val][cell.row]--;
+        colCount[val][cell.col]--;
+      }
+    }
+    return false;
+  }
+
+  var solved = solve(0);
+  return { grid: solved ? grid : [], solved: solved };
 }
 
 // ==== Solver Dispatcher ====
 
 async function runQueensSolver() {
   var board = parseQueensBoard();
-  if (!board) return { success: false, error: "Failed to parse board" };
+  if (!board) return null;
 
   var solution = solveQueens(board);
   if (!solution.solved) return { success: false, error: "No solution found" };
@@ -325,15 +475,14 @@ async function runQueensSolver() {
 
 async function runZipSolver() {
   var board = parseZipBoard();
-  if (!board) return { success: false, error: "Failed to parse board" };
+  if (!board) return null;
 
   var solution = solveZip(board);
   if (!solution.solved) return { success: false, error: "No solution found" };
 
-  // Simulate drag: mousedown, mousemove through path, mouseup
   var first = solution.path[0];
   var firstIdx = first.row * board.size + first.col;
-  var startCenter = getCellCenterByIdx(firstIdx);
+  var startCenter = getCellCenter(first.row, first.col, board.size);
   if (!startCenter) return { success: false, error: "Could not find start cell" };
 
   await sendMouseEvent("mousePressed", startCenter.x, startCenter.y);
@@ -341,8 +490,7 @@ async function runZipSolver() {
 
   for (var i = 1; i < solution.path.length; i++) {
     var pos = solution.path[i];
-    var idx = pos.row * board.size + pos.col;
-    var center = getCellCenterByIdx(idx);
+    var center = getCellCenter(pos.row, pos.col, board.size);
     if (center) {
       await sendMouseEvent("mouseMoved", center.x, center.y);
       await delay(30);
@@ -350,10 +498,52 @@ async function runZipSolver() {
   }
 
   var last = solution.path[solution.path.length - 1];
-  var lastIdx = last.row * board.size + last.col;
-  var endCenter = getCellCenterByIdx(lastIdx);
+  var endCenter = getCellCenter(last.row, last.col, board.size);
   if (endCenter) {
     await sendMouseEvent("mouseReleased", endCenter.x, endCenter.y);
+  }
+
+  return { success: true };
+}
+
+async function runTangoSolver() {
+  var board = parseTangoBoard();
+  if (!board) return null;
+
+  var solution = solveTango(board);
+  if (!solution.solved) return { success: false, error: "No solution found" };
+
+  var size = board.size;
+  for (var r = 0; r < size; r++) {
+    for (var c = 0; c < size; c++) {
+      if (board.grid[r][c] !== null) continue;
+      var target = solution.grid[r][c];
+      var idx = r * size + c;
+
+      // Read current value
+      var cellEl = document.querySelector('[data-testid="cell-' + idx + '"]');
+      var current = null;
+      if (cellEl) {
+        var svg = cellEl.querySelector('svg[aria-label="Sun"], svg[aria-label="Moon"]');
+        if (svg) {
+          var lbl = svg.getAttribute("aria-label");
+          if (lbl === "Sun") current = "sun";
+          else if (lbl === "Moon") current = "moon";
+        }
+      }
+
+      // Click cycles: empty→sun→moon→empty
+      var clicks = 0;
+      if (current === null) clicks = (target === 'sun') ? 1 : 2;
+      else if (current === 'sun') clicks = (target === 'sun') ? 0 : 1;
+      else clicks = (target === 'moon') ? 0 : 2;
+
+      var center = getCellCenter(r, c, size);
+      if (!center) continue;
+      for (var k = 0; k < clicks; k++) {
+        await sendClick(center.x, center.y);
+      }
+    }
   }
 
   return { success: true };
@@ -363,7 +553,8 @@ async function runSolver(game) {
   switch (game) {
     case "queens": return runQueensSolver();
     case "zip": return runZipSolver();
-    default: return { success: false, error: "Unknown game: " + game };
+    case "tango": return runTangoSolver();
+    default: return null;
   }
 }
 
@@ -371,7 +562,11 @@ async function runSolver(game) {
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
   if (message.type === "SOLVE") {
     runSolver(message.game).then(function(result) {
-      sendResponse(result);
+      if (result) {
+        sendResponse(result);
+      } else {
+        sendResponse({ success: false, error: "Failed to parse board" });
+      }
     });
     return true;
   }
