@@ -1,15 +1,25 @@
 "use strict";
 
-var statusEl = document.getElementById("status");
-var controlsEl = document.getElementById("controls");
-var gameNameEl = document.getElementById("game-name");
-var solveBtn = document.getElementById("solve-btn");
+var GAMES = {
+  queens:  { id: "card-queens",  label: "Queens" },
+  zip:     { id: "card-zip",     label: "Zip" },
+  tango:   { id: "card-tango",   label: "Tango" },
+  patches: { id: "card-patches", label: "Patches" }
+};
+
+var statusDot = document.getElementById("status-dot");
+var statusText = document.getElementById("status-text");
+
+function setStatus(state, message) {
+  statusDot.className = "status-dot";
+  if (state) statusDot.classList.add(state);
+  statusText.textContent = message;
+}
 
 function detectGame(url) {
   try {
     var parsed = new URL(url);
 
-    // LinkedIn games
     if (parsed.hostname.includes("linkedin.com")) {
       var linkedinGames = ["queens", "zip", "tango", "patches"];
       for (var i = 0; i < linkedinGames.length; i++) {
@@ -19,7 +29,6 @@ function detectGame(url) {
       }
     }
 
-    // Archived Queens
     if (parsed.hostname.includes("archivedqueens.com")) {
       return { game: "queens", site: "archived" };
     }
@@ -35,26 +44,49 @@ async function init() {
 
   var detected = detectGame(tab.url);
 
-  if (detected) {
-    var label = detected.game.charAt(0).toUpperCase() + detected.game.slice(1);
-    if (detected.site === "archived") label += " (Archived)";
-    statusEl.textContent = "Game detected!";
-    gameNameEl.textContent = label;
-    controlsEl.classList.remove("hidden");
-
-    solveBtn.addEventListener("click", function() {
-      solveBtn.disabled = true;
-      statusEl.textContent = "Solving...";
-      chrome.tabs.sendMessage(tab.id, { type: "SOLVE", game: detected.game }, function(response) {
-        if (response && response.success) {
-          statusEl.textContent = "Solved!";
-        } else {
-          statusEl.textContent = "Error: " + (response ? response.error : "no response");
-          solveBtn.disabled = false;
-        }
-      });
-    });
+  if (!detected) {
+    setStatus("", "Navigate to a LinkedIn game to begin");
+    return;
   }
+
+  var gameKey = detected.game;
+  var gameInfo = GAMES[gameKey];
+  if (!gameInfo) return;
+
+  var card = document.getElementById(gameInfo.id);
+  var statusSpan = card.querySelector(".card-status");
+  var solveBtn = card.querySelector(".solve-btn");
+
+  // Activate card
+  card.classList.add("active");
+  statusSpan.textContent = "READY";
+
+  var siteLabel = detected.site === "archived" ? " (Archived)" : "";
+  setStatus("active", gameInfo.label + siteLabel + " detected — ready to solve");
+
+  solveBtn.addEventListener("click", function() {
+    solveBtn.disabled = true;
+    solveBtn.classList.add("solving");
+    statusSpan.textContent = "SOLVING";
+    setStatus("solving", "Solving " + gameInfo.label + "...");
+
+    chrome.tabs.sendMessage(tab.id, { type: "SOLVE", game: gameKey }, function(response) {
+      solveBtn.classList.remove("solving");
+
+      if (response && response.success) {
+        card.classList.remove("active");
+        card.classList.add("solved");
+        statusSpan.textContent = "SOLVED";
+        setStatus("solved", gameInfo.label + " solved successfully!");
+        solveBtn.style.display = "none";
+      } else {
+        var errMsg = response ? response.error : "no response";
+        statusSpan.textContent = "ERROR";
+        setStatus("error", "Error: " + errMsg);
+        solveBtn.disabled = false;
+      }
+    });
+  });
 }
 
 init();

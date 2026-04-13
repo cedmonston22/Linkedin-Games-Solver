@@ -1,0 +1,91 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - button "Skip to main content" [ref=e4] [cursor=pointer]:
+      - generic [ref=e5]: Skip to main content
+    - button "Close jump menu" [ref=e6] [cursor=pointer]:
+      - img [ref=e8]
+      - generic [ref=e11]: Close jump menu
+  - banner [ref=e13]:
+    - generic [ref=e14]:
+      - generic:
+        - link "LinkedIn Logo LinkedIn Brand" [ref=e16] [cursor=pointer]:
+          - /url: /en-us
+          - generic [ref=e17]:
+            - generic [ref=e18]: LinkedIn Logo
+            - img [ref=e19]
+          - generic [ref=e21]: LinkedIn
+          - text: Brand
+        - navigation "Primary header navigation" [ref=e22]:
+          - list [ref=e23]:
+            - listitem [ref=e24]:
+              - link "[in] Logo" [ref=e25] [cursor=pointer]:
+                - /url: /in-logo
+            - listitem [ref=e26]:
+              - link "LinkedIn Logo" [ref=e27] [cursor=pointer]:
+                - /url: /linkedin-logo
+            - listitem [ref=e28]:
+              - link "Badges & Other Programs" [ref=e29] [cursor=pointer]:
+                - /url: /badges-and-programs
+            - listitem [ref=e30]:
+              - link "Business, Books & Other Media Usage" [ref=e31] [cursor=pointer]:
+                - /url: /business-books-and-media-usage
+  - generic [ref=e33]:
+    - main [ref=e34]:
+      - generic [ref=e35]:
+        - heading "Downloads" [level=1] [ref=e49]
+        - generic [ref=e61]:
+          - paragraph [ref=e62]:
+            - generic [ref=e64]:
+              - text: By downloading our logos, you agree to comply with the terms of the
+              - link "LinkedIn Brand and User Agreements" [ref=e65] [cursor=pointer]:
+                - /url: /en-us
+              - text: .
+          - paragraph [ref=e66]:
+            - generic [ref=e68]:
+              - text: Please note that LinkedIn expressly disclaims any warranties that may be express or implied by law regarding
+              - link "the Brand" [ref=e69] [cursor=pointer]:
+                - /url: /en-us
+              - text: and your download thereof (to the extent permitted by law), including warranties against infringement.
+        - generic [ref=e77]:
+          - generic [ref=e86]:
+            - paragraph [ref=e90]:
+              - generic [ref=e91]: "[in] Logo"
+            - img "[in] Logo" [ref=e99]
+            - link "Learn more" [ref=e105] [cursor=pointer]:
+              - /url: https://content.linkedin.com/content/dam/me/business/en-us/amp/xbu/linkedin-revised-brand-guidelines/logos/in-logo.zip
+              - text: Download [in] Logo
+          - generic [ref=e115]:
+            - paragraph [ref=e119]:
+              - generic [ref=e120]: LinkedIn Logo
+            - img "LinkedIn Logo" [ref=e128]
+            - link "Learn more" [ref=e134] [cursor=pointer]:
+              - /url: https://content.linkedin.com/content/dam/me/business/en-us/amp/xbu/linkedin-revised-brand-guidelines/logos/linkedin-logo.zip
+              - text: Download LinkedIn Logo
+    - contentinfo [ref=e136]:
+      - generic [ref=e141]:
+        - list [ref=e142]:
+          - listitem [ref=e143]:
+            - link "About" [ref=e144] [cursor=pointer]:
+              - /url: https://about.linkedin.com
+          - listitem [ref=e145]:
+            - link "Cookie Policy" [ref=e146] [cursor=pointer]:
+              - /url: https://www.linkedin.com/legal/cookie-policy?src=direct%2Fnone&veh=direct%2Fnone
+          - listitem [ref=e147]:
+            - link "Privacy Policy" [ref=e148] [cursor=pointer]:
+              - /url: https://www.linkedin.com/legal/privacy-policy?src=direct%2Fnone&veh=direct%2Fnone
+          - listitem [ref=e149]:
+            - link "Your California Privacy Choices" [ref=e150] [cursor=pointer]:
+              - /url: https://www.linkedin.com/legal/california-privacy-disclosure?src=direct%2Fnone&veh=direct%2Fnone
+          - listitem [ref=e151]:
+            - link "User Agreement" [ref=e152] [cursor=pointer]:
+              - /url: https://www.linkedin.com/legal/user-agreement?src=direct%2Fnone&veh=direct%2Fnone
+          - listitem [ref=e153]:
+            - link "Accessibility" [ref=e154] [cursor=pointer]:
+              - /url: https://www.linkedin.com/accessibility?src=direct%2Fnone&veh=direct%2Fnone
+        - generic [ref=e155]:
+          - generic [ref=e156]: LinkedIn logo
+          - img [ref=e157]
+          - text: © LinkedIn Corporation 2026
+    - button [disabled] [ref=e162] [cursor=pointer]:
+      - img [ref=e164]
+      - generic [ref=e167]: dismiss
