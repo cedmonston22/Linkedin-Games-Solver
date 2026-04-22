@@ -6,18 +6,15 @@ export function parseTangoBoard(): TangoBoard | null {
   );
   if (!grid) return null;
 
-  const style = grid.getAttribute("style") ?? "";
-  const sizeMatch = style.match(/--_6afcf54e:\s*(\d+)/);
-  if (!sizeMatch) return null;
-  const size = parseInt(sizeMatch[1]!, 10);
-
-  // Filter to game cells only (exclude "How to play" example cells)
   const allCells = grid.querySelectorAll<HTMLElement>('[data-testid^="cell-"]');
   const cells: HTMLElement[] = [];
   for (const c of allCells) {
     if (/^cell-\d+$/.test(c.getAttribute("data-testid") ?? "")) cells.push(c);
   }
-  if (cells.length !== size * size) return null;
+  if (cells.length === 0) return null;
+
+  const size = Math.round(Math.sqrt(cells.length));
+  if (size * size !== cells.length) return null;
 
   const boardGrid: (TangoValue | null)[][] = Array.from({ length: size }, () =>
     new Array<TangoValue | null>(size).fill(null)
@@ -32,7 +29,6 @@ export function parseTangoBoard(): TangoBoard | null {
     const row = Math.floor(idx / size);
     const col = idx % size;
 
-    // Read cell value from SVG aria-label
     const svgs = cell.querySelectorAll<SVGElement>("svg[aria-label]");
     for (const svg of svgs) {
       const label = svg.getAttribute("aria-label");
@@ -40,7 +36,6 @@ export function parseTangoBoard(): TangoBoard | null {
       else if (label === "Moon") boardGrid[row]![col] = "moon";
     }
 
-    // Read constraint markers (Equal/Cross SVGs on edge elements)
     const edgeSvgs = cell.querySelectorAll<SVGElement>(
       'svg[aria-label="Equal"], svg[aria-label="Cross"]'
     );
@@ -52,21 +47,28 @@ export function parseTangoBoard(): TangoBoard | null {
       const edgeParent = edgeSvg.parentElement;
       if (!edgeParent) continue;
 
-      // Detect direction from edge position relative to cell
       let r2 = row;
       let c2 = col;
-      const cellRect = cell.getBoundingClientRect();
-      const edgeRect = edgeParent.getBoundingClientRect();
-      const edgeCenterX = edgeRect.left + edgeRect.width / 2;
-      const edgeCenterY = edgeRect.top + edgeRect.height / 2;
-
-      if (
-        Math.abs(edgeCenterX - cellRect.right) <
-        Math.abs(edgeCenterY - cellRect.bottom)
-      ) {
+      const parentClass = (edgeParent.className || "").toString();
+      // Prefer class-name hints when present (unobfuscated builds)
+      if (/right/i.test(parentClass)) {
         c2 = col + 1;
-      } else {
+      } else if (/down|bottom/i.test(parentClass)) {
         r2 = row + 1;
+      } else {
+        // Geometric fallback: whichever cell edge the marker sits closer to
+        const cellRect = cell.getBoundingClientRect();
+        const edgeRect = edgeParent.getBoundingClientRect();
+        const edgeCenterX = edgeRect.left + edgeRect.width / 2;
+        const edgeCenterY = edgeRect.top + edgeRect.height / 2;
+        if (
+          Math.abs(edgeCenterX - cellRect.right) <
+          Math.abs(edgeCenterY - cellRect.bottom)
+        ) {
+          c2 = col + 1;
+        } else {
+          r2 = row + 1;
+        }
       }
 
       if (r2 < size && c2 < size && (r2 !== row || c2 !== col)) {

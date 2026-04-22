@@ -1,4 +1,4 @@
-import type { PatchesSolution, PatchesRect, ClickCellResponse } from "../../types";
+import type { PatchesSolution, ClickCellResponse } from "../../types";
 
 /**
  * Sends a mouse event to the background worker via Chrome Debugger API.

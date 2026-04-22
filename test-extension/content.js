@@ -142,17 +142,55 @@ function encodeWall(row, col, direction) {
   return row + "," + col + "," + direction;
 }
 
+function collectGameCells(grid) {
+  var all = grid.querySelectorAll('[data-testid^="cell-"]');
+  var out = [];
+  for (var i = 0; i < all.length; i++) {
+    var tid = all[i].getAttribute("data-testid") || "";
+    if (/^cell-\d+$/.test(tid)) out.push(all[i]);
+  }
+  return out;
+}
+
+function deriveGridSize(cells) {
+  if (!cells || cells.length === 0) return 0;
+  var n = Math.round(Math.sqrt(cells.length));
+  return n * n === cells.length ? n : 0;
+}
+
+function classifyZipWall(div, cellRect) {
+  var cls = (div.className || "").toString();
+  if (/wall.*?right/i.test(cls)) return "right";
+  if (/wall.*?left/i.test(cls)) return "left";
+  if (/wall.*?top/i.test(cls)) return "top";
+  if (/wall.*?bottom/i.test(cls)) return "bottom";
+  if (cls.indexOf("_63fae645") !== -1) return "right";
+  if (cls.indexOf("_6177935e") !== -1) return "left";
+  var r = div.getBoundingClientRect();
+  if (r.width === 0 || r.height === 0) return null;
+  var isThin = r.width < cellRect.width * 0.25 || r.height < cellRect.height * 0.25;
+  if (!isThin) return null;
+  var midX = r.left + r.width / 2;
+  var midY = r.top + r.height / 2;
+  var dRight = Math.abs(midX - cellRect.right);
+  var dLeft = Math.abs(midX - cellRect.left);
+  var dTop = Math.abs(midY - cellRect.top);
+  var dBottom = Math.abs(midY - cellRect.bottom);
+  var minD = Math.min(dRight, dLeft, dTop, dBottom);
+  if (minD > Math.min(cellRect.width, cellRect.height) * 0.2) return null;
+  if (minD === dRight) return "right";
+  if (minD === dLeft) return "left";
+  if (minD === dTop) return "top";
+  return "bottom";
+}
+
 function parseZipBoard() {
   var grid = document.querySelector('[data-testid="interactive-grid"]');
   if (!grid) return null;
 
-  var style = grid.getAttribute("style") || "";
-  var sizeMatch = style.match(/--_6afcf54e:\s*(\d+)/);
-  if (!sizeMatch) return null;
-  var size = parseInt(sizeMatch[1], 10);
-
-  var cells = grid.querySelectorAll('[data-testid^="cell-"]');
-  if (cells.length !== size * size) return null;
+  var cells = collectGameCells(grid);
+  var size = deriveGridSize(cells);
+  if (!size) return null;
 
   var checkpoints = {};
   var walls = {};
@@ -166,7 +204,6 @@ function parseZipBoard() {
     var row = Math.floor(idx / size);
     var col = idx % size;
 
-    // Check for numbered checkpoint via aria-label
     var ariaLabel = cell.getAttribute("aria-label");
     if (ariaLabel) {
       var numMatch = ariaLabel.match(/Number\s+(\d+)/);
@@ -175,15 +212,17 @@ function parseZipBoard() {
       }
     }
 
-    // Check for walls — look for child divs with wall classes
+    var cellRect = cell.getBoundingClientRect();
     var allDivs = cell.querySelectorAll("div");
     for (var d = 0; d < allDivs.length; d++) {
-      var cls = allDivs[d].className;
-      // Obfuscated class names from LinkedIn's build
-      if (cls.indexOf("_63fae645") !== -1) walls[encodeWall(row, col, "right")] = true;
-      if (cls.indexOf("_6177935e") !== -1) walls[encodeWall(row, col, "left")] = true;
+      var dir = classifyZipWall(allDivs[d], cellRect);
+      if (dir) walls[encodeWall(row, col, dir)] = true;
     }
   }
+
+  var checkpointCount = 0;
+  for (var k in checkpoints) if (checkpoints.hasOwnProperty(k)) checkpointCount++;
+  if (checkpointCount < 2) return null;
 
   return { size: size, checkpoints: checkpoints, walls: walls };
 }
@@ -270,19 +309,9 @@ function parseTangoBoard() {
   var grid = document.querySelector('[data-testid="interactive-grid"]');
   if (!grid) return null;
 
-  var style = grid.getAttribute("style") || "";
-  var sizeMatch = style.match(/--_6afcf54e:\s*(\d+)/);
-  if (!sizeMatch) return null;
-  var size = parseInt(sizeMatch[1], 10);
-
-  // Filter to only game cells (exclude "How to play" example cells)
-  var allCells = grid.querySelectorAll('[data-testid^="cell-"]');
-  var cells = [];
-  for (var ci = 0; ci < allCells.length; ci++) {
-    var tid = allCells[ci].getAttribute("data-testid") || "";
-    if (tid.match(/^cell-\d+$/)) cells.push(allCells[ci]);
-  }
-  if (cells.length !== size * size) return null;
+  var cells = collectGameCells(grid);
+  var size = deriveGridSize(cells);
+  if (!size) return null;
 
   var board = [];
   for (var r = 0; r < size; r++) {
@@ -325,24 +354,21 @@ function parseTangoBoard() {
       var parentClass = edgeParent.className || "";
 
       var r2 = row, c2 = col;
-      // Check for right/down indicators in class names (obfuscated or not)
-      // Right edges connect (row, col) to (row, col+1)
-      // Down edges connect (row, col) to (row+1, col)
-      // We detect direction by the edge element's position/class
-      if (parentClass.indexOf("--right") !== -1 || parentClass.indexOf("_63fae645") !== -1) {
+      // Prefer class-name hints when present (unobfuscated builds)
+      if (/right/i.test(parentClass)) {
         c2 = col + 1;
-      } else if (parentClass.indexOf("--down") !== -1 || parentClass.indexOf("_6177935e") !== -1) {
+      } else if (/down|bottom/i.test(parentClass)) {
         r2 = row + 1;
       } else {
-        // Try to detect from position: get bounding rects
+        // Geometric fallback for fully obfuscated builds
         var cellRect = cell.getBoundingClientRect();
         var edgeRect = edgeParent.getBoundingClientRect();
         var edgeCenterX = edgeRect.left + edgeRect.width / 2;
         var edgeCenterY = edgeRect.top + edgeRect.height / 2;
         if (Math.abs(edgeCenterX - cellRect.right) < Math.abs(edgeCenterY - cellRect.bottom)) {
-          c2 = col + 1; // right edge
+          c2 = col + 1;
         } else {
-          r2 = row + 1; // bottom edge
+          r2 = row + 1;
         }
       }
 
@@ -468,18 +494,9 @@ function parsePatchesBoard() {
   var grid = document.querySelector('[data-testid="interactive-grid"]');
   if (!grid) return null;
 
-  var style = grid.getAttribute("style") || "";
-  var sizeMatch = style.match(/--_6afcf54e:\s*(\d+)/);
-  if (!sizeMatch) return null;
-  var size = parseInt(sizeMatch[1], 10);
-
-  var allPCells = grid.querySelectorAll('[data-testid^="cell-"]');
-  var cells = [];
-  for (var pci = 0; pci < allPCells.length; pci++) {
-    var ptid = allPCells[pci].getAttribute("data-testid") || "";
-    if (ptid.match(/^cell-\d+$/)) cells.push(allPCells[pci]);
-  }
-  if (cells.length !== size * size) return null;
+  var cells = collectGameCells(grid);
+  var size = deriveGridSize(cells);
+  if (!size) return null;
 
   var clues = [];
   for (var i = 0; i < cells.length; i++) {
